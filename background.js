@@ -38,7 +38,7 @@ chrome.storage.sync.get(storageKey, function(data) {
             } else {    // we have a request for one of the IPs in the hosts file
                 // case 1: e.g. 127.0.0.1/www.example.com(/.*)?
                 // look for a matching IP/hostname pair in our hosts file
-                let host = Object.keys(hostData).find(host => parser.hostname = hostData[host].on && parser.pathname.startsWith("/"+host));
+                let host = Object.keys(hostData).find(host => parser.hostname == hostData[host].on && parser.pathname.startsWith("/"+host));
                 if (host) {
                     // update the record
                     requests[details.tabId] = {
