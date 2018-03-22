@@ -51,7 +51,7 @@ chrome.storage.sync.get(storageKey, function(data) {
                     // (we will add the Host header in the onBeforeSendHeaders listener)
                     return {
                         redirectUrl: parser.protocol + "//" + hostData[host].on + (parser.port != "" ? ":" + parser.port : "") +
-                                        parser.pathname.replace("/" + host, "/") + parser.search + parser.hash
+                                        parser.pathname.replace("/" + host, "/").replace("//", "/") + parser.search + parser.hash
                     }
                 }
                 // case 2: e.g. 127.0.0.1(/.*)?

@@ -72,6 +72,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
                 chrome.storage.sync.set(data, updateHostsView(data[storageKey]));
             });
+            document.getElementById("new_host_name").value = "";
+            document.getElementById("new_host_ip").value = "";
         }
     };
 
