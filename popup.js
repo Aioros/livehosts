@@ -95,6 +95,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         host.off = host.off.filter(ip => ip !== elem.parentNode.dataset.ip);
                         host.on = elem.parentNode.dataset.ip;
                     } else {
+                        if (!host.off)
+                            host.off = [];
                         host.off.push(host.on);
                         delete host.on;
                     }
