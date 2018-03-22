@@ -11,13 +11,17 @@
     <button id="add_host">Add</button>
     <button id="save_hosts">Save</button>
     <textarea id="hosts"></textarea>
-    <div id="host_placeholder" class="host placeholder">
-      <input type="text" size="20" class="host-name" />
-      <div class="host-ips">
-        <div class="host-ip-entry placeholder">
-          <input type="checkbox" class="on" />
-          <input type="text" size="20" class="host-ip" />
+    <div id="hosts_list">
+      <div id="host_placeholder" class="host placeholder">
+        <a href="#" class="host-delete">Delete</a>
+        <input type="text" size="20" class="host-name" />
+        <div class="host-ips">
+          <div class="host-ip-entry placeholder">
+            <input type="checkbox" class="on" />
+            <input type="text" size="20" class="host-ip" />
+          </div>
         </div>
+        <div class="clearfix"></div>
       </div>
     </div>
   </body>

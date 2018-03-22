@@ -1,8 +1,29 @@
+body {
+	width: 450px;
+}
+
 #hosts {
-	width: 400px;
+	display: none;
+	width: 500px;
 	height: 300px;
+}
+
+#save_hosts {
+	display: none;
 }
 
 .placeholder {
 	display: none;
+}
+
+.host {
+	margin: 10px 0;
+}
+
+.host-ips {
+	float: right;
+}
+
+.clearfix {
+	clear: both;
 }

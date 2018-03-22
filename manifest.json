@@ -3,8 +3,9 @@
   "name": "LiveHosts",
   "version": "0.1",
   "icons": {
-    "32": "livehosts-32.png",
-    "48": "livehosts-48.png"
+    "16": "icons/livehosts-16.png",
+    "48": "icons/livehosts-48.png",
+    "128": "icons/livehosts-128.png"
   },
   "description": "Switch your host/IP mappings in real time without editing your hosts file",
   "background": {
@@ -12,7 +13,10 @@
   },
   "options_page": "options.html",
   "browser_action": {
-    "default_icon": "icon.png",
+    "default_icon": {
+      "19": "icons/livehosts-19.png",
+      "38": "icons/livehosts-38.png"
+    },
     "default_popup": "popup.html"
   },
   "content_scripts": [

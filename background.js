@@ -10,7 +10,7 @@ var storageKey = "livehosts";
 
 chrome.storage.sync.get(storageKey, function(data) {
     if (data[storageKey]) {
-        hostData = /*JSON.parse*/(data[storageKey]);
+        hostData = data[storageKey];
 
         var hostMatches = Object.keys(hostData).map(host => "*://" + host + "/*");
         var ipMatches = Object.values(hostData).filter(ip => ip.on).map(ip => "*://" + ip.on + "/*");
@@ -103,7 +103,7 @@ chrome.storage.sync.get(storageKey, function(data) {
 chrome.storage.onChanged.addListener(function(changes, namespace) {
     if (changes[storageKey]) {
         var hostsChange = changes[storageKey];
-        hostData = /*JSON.parse*/(changes[storageKey].newValue);
+        hostData = changes[storageKey].newValue;
     }
 });
 
