@@ -110,15 +110,15 @@ chrome.storage.onChanged.addListener(function(changes, namespace) {
 
 // This part here is something that could work in the future (intercepting the request through the DevTools protocol)
 // https://stackoverflow.com/a/45220932/1882497
-/*
-chrome.debugger.getTargets((targets) => {
-    let target = targets.find(t => t.tabId == 69);
+
+/*chrome.debugger.getTargets((targets) => {
+    let target = targets.find(t => t.tabId == 738);
     console.log(targets, target);
     let debuggee = { targetId: target.id };
 
     //chrome.debugger.detach(debuggee, () => {
         chrome.debugger.attach(debuggee, "1.2", () => {
-            chrome.debugger.sendCommand(debuggee, "Network.setRequestInterceptionEnabled", { enabled: true });
+            chrome.debugger.sendCommand(debuggee, "Network.setRequestInterception", { patterns: [{ urlPattern: '*' }] });
         });
     //});
 
