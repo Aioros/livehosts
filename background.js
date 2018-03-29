@@ -7,7 +7,7 @@ function parseUrl(url) {
 
 var hostData = {};
 var storageKey = "livehosts";
-
+/*
 chrome.storage.sync.get(storageKey, function(data) {
     if (data[storageKey]) {
         hostData = data[storageKey];
@@ -106,7 +106,7 @@ chrome.storage.onChanged.addListener(function(changes, namespace) {
         hostData = changes[storageKey].newValue;
     }
 });
-
+*/
 
 // This part here is something that could work in the future (intercepting the request through the DevTools protocol)
 // https://stackoverflow.com/a/45220932/1882497

@@ -1,0 +1,27 @@
+<input type="text" id="new_host_name" placeholder="Hostname" ng-model="$ctrl.newRule.hostName" />
+<input type="text" id="new_host_ip" placeholder="IP" ng-model="$ctrl.newRule.ip" />
+<button id="add_host" ng-click="$ctrl.addRule()">Add</button>
+<button id="add_host" ng-click="$ctrl.saveRules()">Save</button>
+<ul class="hosts">
+	<li ng-repeat="host in $ctrl.data">
+		<input ng-model="host.hostName" />
+		<ul class="ips">
+			<li ng-repeat="rule in host.ips">
+				<input ng-model="rule.ip" />
+				<label for="this-tab">This tab</label>
+				<input
+					name="this-tab" type="checkbox"
+					ng-checked="rule.active == !(rule.exceptions.includes($ctrl.currentTab))"
+					ng-click="$ctrl.changeLocalRule($event, this)"
+				/>
+				<label for="all-tabs">All tabs</label>
+				<input
+					name="all-tabs" type="checkbox"
+					ng-model="rule.active"
+					ng-change="$ctrl.changeGlobalRule(this)"
+				/>
+				<input type="button" value="Delete" ng-click="$ctrl.deleteRule(this)" />
+			</li>
+		</ul>
+	</li>
+</ul>

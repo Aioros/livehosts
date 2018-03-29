@@ -1,3 +1,7 @@
+angular.module('liveHosts', [
+  'hostData'
+]);
+/*
 var storageKey = chrome.extension.getBackgroundPage().storageKey;
 
 function hostInfoToId(hostname, ip) {
@@ -124,4 +128,4 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-});
+});*/
