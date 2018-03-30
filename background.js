@@ -40,9 +40,7 @@ chrome.storage.sync.get(storageKey, function(data) {
     if (data[storageKey]) {
         hostData = data[storageKey];
 
-        //var hostMatches = Object.keys(hostData).map(host => "*://" + host + "/*");
         var hostMatches = hostData.map(host => "*://" + host.hostName + "/*");
-        //var ipMatches = Object.values(hostData).filter(ip => ip.on).map(ip => "*://" + ip.on + "/*");
         var ipMatches = hostData.reduce((acc, cur) => [...acc, ...cur.ips.map(el => "*://" + el.ip + "/*")], []);
 
         var requests = {};
@@ -50,16 +48,14 @@ chrome.storage.sync.get(storageKey, function(data) {
         chrome.webRequest.onBeforeRequest.addListener(function(details) {//console.log("request", details);
             var parser = parseUrl(details.url);
             
-            //if ([parser.hostname] && hostData[parser.hostname].on) {    // we have a request for one of the hosts in the hosts file
             let hostMatch = hostData.find(host => host.hostName === parser.hostname);
-            if (hostMatch) {
+            if (hostMatch) {    // we have a request for one of the hosts in the hosts file
                 let ruleActive = hostMatch.ips.find(rule => rule.active);
                 if (ruleActive) {
                     // Add the host/IP/tab data to our record
                     if (details.type === "main_frame") {
                         requests[details.tabId] = {
                             hostname: parser.hostname,
-                            //ip: hostData[parser.hostname].on,
                             ip: ruleActive.ip,
                             tabId: details.tabId,
                             requestId: details.requestId
@@ -67,21 +63,18 @@ chrome.storage.sync.get(storageKey, function(data) {
                     }
                     // redirect to the IP, we will add the Host header in the onBeforeSendHeaders listener
                     return {
-                        redirectUrl: parser.protocol + "//" + ruleActive.ip/*hostData[parser.hostname].on*/ + (parser.port != "" ? ":" + parser.port : "") +
+                        redirectUrl: parser.protocol + "//" + ruleActive.ip + (parser.port != "" ? ":" + parser.port : "") +
                                         parser.pathname + parser.search + parser.hash
                     };
                 }
             } else {    // we have a request for one of the IPs in the hosts file
                 // case 1: e.g. 127.0.0.1/www.example.com(/.*)?
                 // look for a matching IP/hostname pair in our hosts file
-                //let host = Object.keys(hostData).find(host => parser.hostname == hostData[host].on && parser.pathname.startsWith("/"+host));
                 let host = hostData.find(host => parser.pathname.startsWith("/"+host.hostName) && host.ips.find(rule => rule.ip === parser.hostname));
                 if (host) {
                     // update the record
                     requests[details.tabId] = {
-                        //hostname: host,
                         hostname: host.hostName,
-                        //ip: hostData[host].on,
                         ip: parser.hostname,
                         tabId: details.tabId,
                         requestId: details.requestId
@@ -89,7 +82,7 @@ chrome.storage.sync.get(storageKey, function(data) {
                     // redirect to the IP, removing the hostname from the path
                     // (we will add the Host header in the onBeforeSendHeaders listener)
                     return {
-                        redirectUrl: parser.protocol + "//" + parser.hostname/*hostData[host].on*/ + (parser.port != "" ? ":" + parser.port : "") +
+                        redirectUrl: parser.protocol + "//" + parser.hostname + (parser.port != "" ? ":" + parser.port : "") +
                                         parser.pathname.replace("/" + host.hostName, "/").replace("//", "/") + parser.search + parser.hash
                     }
                 }
