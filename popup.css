@@ -2,6 +2,14 @@ body {
 	width: 450px;
 }
 
+#new_host_name {
+	width: 200px;
+}
+
+#new_host_ip {
+	width: 190px;
+}
+
 #hosts {
 	display: none;
 	width: 500px;
@@ -26,4 +34,33 @@ body {
 
 .clearfix {
 	clear: both;
+}
+
+.changed {
+	text-align: center;
+	margin: 10px;
+}
+
+form.ng-pristine .changed {
+	display: none;
+}
+
+.changed .button {
+	display: inline-block;
+	padding: 4px 8px;
+	opacity: 0.5;
+	color: white;
+	cursor: pointer;
+}
+
+.changed .button.save {
+	background-color: #008000;
+}
+
+.changed .button.cancel {
+	background-color: red;
+}
+
+.changed .button:hover {
+	opacity: 1;
 }
