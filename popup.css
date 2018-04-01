@@ -1,66 +1,35 @@
 body {
-	width: 450px;
-}
-
-#new_host_name {
-	width: 200px;
-}
-
-#new_host_ip {
-	width: 190px;
-}
-
-#hosts {
-	display: none;
 	width: 500px;
-	height: 300px;
+	font-size: 0.8rem;
+	padding-top: 10px;
 }
 
-#save_hosts {
-	display: none;
+.container-fluid {
+	max-height: 300px;
+	overflow-y: scroll;
 }
 
-.placeholder {
-	display: none;
+.form-check-inline {
+	margin-right: 0;
 }
 
-.host {
-	margin: 10px 0;
+.form-control:focus {
+	box-shadow: none;
 }
 
-.host-ips {
-	float: right;
+.form-control-sm {
+	padding: .15rem .5rem;
 }
 
-.clearfix {
-	clear: both;
+.ip {
+	padding-left: 30px;
 }
 
 .changed {
 	text-align: center;
-	margin: 10px;
+	margin: -10px 10px 10px;
 }
 
 form.ng-pristine .changed {
 	display: none;
-}
-
-.changed .button {
-	display: inline-block;
-	padding: 4px 8px;
-	opacity: 0.5;
-	color: white;
-	cursor: pointer;
-}
-
-.changed .button.save {
-	background-color: #008000;
-}
-
-.changed .button.cancel {
-	background-color: red;
-}
-
-.changed .button:hover {
-	opacity: 1;
 }
