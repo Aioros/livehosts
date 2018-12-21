@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "LiveHosts",
-  "version": "0.0.2.0",
+  "version": "0.1.0.0",
   "icons": {
     "16": "icons/livehosts-16.png",
     "48": "icons/livehosts-48.png",
@@ -11,7 +11,6 @@
   "background": {
     "scripts": ["background.js"]
   },
-  "options_page": "options.html",
   "browser_action": {
     "default_icon": {
       "19": "icons/livehosts-19.png",
