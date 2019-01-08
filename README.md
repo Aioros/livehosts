@@ -8,7 +8,7 @@ Unfortunately, there is no way to make Chrome direct requests for a hostname to 
 
 This extension settles for a sub-obtimal approach: requests to the indicated hostnames are redirected to the chosen IPs with an additional `Host` header. The browser's address bar reflects this behaviour showing the hostname right after the IP (e.g. `http://127.0.0.1/www.example.com/`). The extension also tries to take care of all requests to either the IP or the hostname in a consistent way.
 
-You can directly install the extension from the [Chrome Web Store](https://chrome.google.com/webstore/detail/livehosts/nofghomgbilhbjilibckkephmkbkcfen).
+You can directly install the extension from the [Chrome Web Store](https://chrome.google.com/webstore/detail/livehosts/hdpoplemgeaioijkmoebnnjcilfjnjdi).
 
 ## Issues
 
