@@ -10,6 +10,7 @@ var hostData = {};
 /* Sample hostData structure:
 [
     {
+        incognito: false,
         hostName: "www.example.com",
         ips: [
             {
@@ -23,6 +24,7 @@ var hostData = {};
             }
         ]
     },{
+        incognito: true,
         hostName: "www.something.org",
         ips: [
             {
@@ -41,7 +43,7 @@ chrome.storage.sync.get(storageKey, function(data) {
     if (!data[storageKey])
         data[storageKey] = [];
 
-    hostData = data[storageKey];
+    hostData = data[storageKey].filter(rule => !!rule.incognito == chrome.extension.inIncognitoContext);
 
     var hostMatches = hostData.map(host => "*://" + host.hostName + "/*");
     var ipMatches = hostData.reduce((acc, cur) => [...acc, ...cur.ips.map(el => "*://" + el.ip + "/*")], []);
@@ -50,7 +52,9 @@ chrome.storage.sync.get(storageKey, function(data) {
 
     chrome.webRequest.onBeforeRequest.addListener(function(details) {//console.log("request", details);
         var parser = parseUrl(details.url);
-        
+        chrome.browserAction.setBadgeBackgroundColor({color: "#ff7c00"});
+        chrome.browserAction.setBadgeText({text:"✓", tabId: details.tabId});
+
         let hostMatch = hostData && hostData.find(host => host.hostName === parser.hostname);
         if (hostMatch) {    // we have a request for one of the hosts in the hosts file
             let ruleActive = hostMatch.ips.find(rule => rule.active != !!(rule.exceptions && rule.exceptions.includes(details.tabId)));
