@@ -53,7 +53,7 @@ chrome.storage.sync.get(storageKey, function(data) {
         
         let hostMatch = hostData && hostData.find(host => host.hostName === parser.hostname);
         if (hostMatch) {    // we have a request for one of the hosts in the hosts file
-            let ruleActive = hostMatch.ips.find(rule => rule.active != (rule.exceptions && rule.exceptions.includes(details.tabId)));
+            let ruleActive = hostMatch.ips.find(rule => rule.active != !!(rule.exceptions && rule.exceptions.includes(details.tabId)));
             // i.e. the rule is active in this tab if it's active and the tab is not an exception
             // or if it's inactive and the tab is an exception
             if (ruleActive) {
