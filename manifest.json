@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "LiveHosts",
-  "version": "0.1.0.0",
+  "version": "0.1.0.1",
   "icons": {
     "16": "icons/livehosts-16.png",
     "48": "icons/livehosts-48.png",
