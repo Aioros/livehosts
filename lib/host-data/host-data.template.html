@@ -19,7 +19,7 @@
 		</div>
 		<div class="hosts">
 			<div
-				ng-repeat="host in $ctrl.data | filter: {incognito: $ctrl.incognito}"
+				ng-repeat="host in $ctrl.data | filter: incognitoFilter"
 				class="form-group row">
 				<div class="col">
 					<div class="form-row">
