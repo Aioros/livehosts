@@ -139,64 +139,78 @@ function resetRequestListeners() {
     );
 }
 
-var hostsKey = "livehosts";
+/*var hostsKey = "livehosts";
 var optionsKey = "livehostsOptions";
 
 var defaultOptions = {
     newRuleBehaviour: "all",
     incognito: "split"
-}
+}*/
+var xhr = new XMLHttpRequest();
+xhr.onreadystatechange = function() {
+    if (xhr.readyState == 4 && xhr.status == 200) {
 
-chrome.storage.sync.get([hostsKey, optionsKey], function(data) {
-    
-    if (!data[hostsKey])
-        data[hostsKey] = [];
-    if (!data[optionsKey])
-        data[optionsKey] = defaultOptions;
+        var config = JSON.parse(xhr.responseText);
+        var hostsKey = config.hostsKey;
+        var optionsKey = config.optionsKey;
+        var defaultOptions = config.defaultOptions;
 
-    hostData = data[hostsKey];
-    optionsData = data[optionsKey];
+        chrome.storage.sync.get([hostsKey, optionsKey], function(data) {
+            
+            if (!data[hostsKey])
+                data[hostsKey] = [];
+            if (!data[optionsKey])
+                data[optionsKey] = defaultOptions;
 
-    listenUrls = setListenUrls(hostData);
+            hostData = data[hostsKey];
+            optionsData = data[optionsKey];
 
-    resetRequestListeners();
+            listenUrls = setListenUrls(hostData);
 
-    // This is the ugly trick. We can't actually replace the URL in the address bar completely without
-    // a redirect, so we settle for a not-so-subtle fallback: we add the hostname right after the IP.
-    // We send the hostname as a message to the tab, and use the History API in its content script.
-    chrome.tabs.onUpdated.addListener(function(tabId, info, tab) {
-        if (info.status === "complete") {
-            if (requests[tabId]) {
-                activateBadge(tabId);
-                var host = requests[tabId].hostname;
-                chrome.tabs.sendMessage(tabId, {host: host}, function (response) {
-                    if (chrome.runtime.lastError)
-                        console.log(chrome.runtime.lastError);
-                });
-                // delete the completed request from our record
+            resetRequestListeners();
+
+            // This is the ugly trick. We can't actually replace the URL in the address bar completely without
+            // a redirect, so we settle for a not-so-subtle fallback: we add the hostname right after the IP.
+            // We send the hostname as a message to the tab, and use the History API in its content script.
+            chrome.tabs.onUpdated.addListener(function(tabId, info, tab) {
+                if (info.status === "complete") {
+                    if (requests[tabId]) {
+                        activateBadge(tabId);
+                        var host = requests[tabId].hostname;
+                        chrome.tabs.sendMessage(tabId, {host: host}, function (response) {
+                            if (chrome.runtime.lastError)
+                                console.log(chrome.runtime.lastError);
+                        });
+                        // delete the completed request from our record
+                        delete requests[tabId];
+                    }
+                }
+            });
+
+            chrome.tabs.onRemoved.addListener(function(tabId, info) {
                 delete requests[tabId];
+            });
+
+        });
+
+        chrome.storage.onChanged.addListener(function(changes, namespace) {
+            if (changes[hostsKey]) {
+                hostData = changes[hostsKey].newValue;
             }
-        }
-    });
-
-    chrome.tabs.onRemoved.addListener(function(tabId, info) {
-        delete requests[tabId];
-    });
-
-});
-
-chrome.storage.onChanged.addListener(function(changes, namespace) {
-    if (changes[hostsKey]) {
-        hostData = changes[hostsKey].newValue;
+            if (changes[optionsKey]) {
+                optionsData = changes[optionsKey].newValue;
+            }
+            if (changes[hostsKey] || changes[optionsKey]) {
+                listenUrls = setListenUrls(hostData);
+                resetRequestListeners();
+            }
+        });
     }
-    if (changes[optionsKey]) {
-        optionsData = changes[optionsKey].newValue;
-    }
-    if (changes[hostsKey] || changes[optionsKey]) {
-        listenUrls = setListenUrls(hostData);
-        resetRequestListeners();
-    }
-});
+
+};
+
+xhr.open("GET", chrome.runtime.getURL('config.json'), true);
+xhr.send();
 
 function deleteRules(filter = (r => true)) {
     hostData = hostData.filter(r => !filter(r));

@@ -20,21 +20,25 @@ angular
       };
 
       self.getRules = function() {
-        storage.retrieveHosts(function(storageData) {
-          $scope.$apply(function() {
-            self.data = storageData;
-            console.log(self.data);
-            $scope.hostForm.$setPristine();
+        storage.then(function(storage) {
+          storage.retrieveHosts(function(storageData) {
+            $scope.$apply(function() {
+              self.data = storageData;
+              //console.log(self.data);
+              $scope.hostForm.$setPristine();
+            });
           });
         });
       };
 
       self.getOptions = function() {
-        storage.retrieveOptions(function(optionsData) {
-          $scope.$apply(function() {
-            if (optionsData)
-              self.options = optionsData;
-            $scope.hostForm.$setPristine();
+        storage.then(function(storage) {
+          storage.retrieveOptions(function(optionsData) {
+            $scope.$apply(function() {
+              if (optionsData)
+                self.options = optionsData;
+              $scope.hostForm.$setPristine();
+            });
           });
         });
       }
@@ -68,7 +72,7 @@ angular
 
       self.addRule = function($event) {
         if (self.newRule.hostName.length > 0 && self.newRule.ip.length > 0) {
-          console.log(self.options);
+          //console.log(self.options);
           var ipRule = {
             ip: self.newRule.ip
           }
@@ -112,16 +116,18 @@ angular
       };
 
       self.saveRules = function() {
-        storage.saveHosts(self.data.map(rule => {
-          let {$$hashKey, ...cleanRule} = rule;
-          cleanRule.ips = cleanRule.ips.map(ipRule => {
-            let {$$hashKey, ...cleanIp} = ipRule;
-            return cleanIp;
-          });
-          return cleanRule;
-        }), function() {
-          $scope.$apply(function() {
-            $scope.hostForm.$setPristine();
+        storage.then(function(storage) {
+          storage.saveHosts(self.data.map(rule => {
+            let {$$hashKey, ...cleanRule} = rule;
+            cleanRule.ips = cleanRule.ips.map(ipRule => {
+              let {$$hashKey, ...cleanIp} = ipRule;
+              return cleanIp;
+            });
+            return cleanRule;
+          }), function() {
+            $scope.$apply(function() {
+              $scope.hostForm.$setPristine();
+            });
           });
         });
       };

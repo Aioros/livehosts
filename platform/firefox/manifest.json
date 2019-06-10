@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "LiveHosts",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "browser_specific_settings": {
     "gecko": {
       "id": "livehosts@aioros.net",
@@ -30,6 +30,9 @@
       "js": [ "switcher.js" ],
       "matches": [ "http://*/*", "https://*/*", "file://*/*" ]
     }
+  ],
+  "web_accessible_resources": [
+    "config.json"
   ],
   "incognito": "spanning",
   "permissions": [

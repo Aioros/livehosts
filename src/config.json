@@ -1,0 +1,8 @@
+{
+	"hostsKey": "livehosts",
+	"optionsKey": "livehostsOptions",
+	"defaultOptions": {
+		"newRuleBehaviour": "all",
+		"incognito": "split"
+	}
+}
