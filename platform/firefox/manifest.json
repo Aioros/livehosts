@@ -1,0 +1,43 @@
+{
+  "manifest_version": 2,
+  "name": "LiveHosts",
+  "version": "1.1.0",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "livehosts@aioros.net",
+      "strict_min_version": "42.0"
+    }
+  },
+  "icons": {
+    "16": "icons/livehosts-16.png",
+    "48": "icons/livehosts-48.png",
+    "128": "icons/livehosts-128.png"
+  },
+  "description": "Switch your host/IP mappings in real time without editing your hosts file",
+  "background": {
+    "scripts": ["background.js"]
+  },
+  "options_ui": { "page": "options.html"},
+  "browser_action": {
+    "default_icon": {
+      "19": "icons/livehosts-19.png",
+      "38": "icons/livehosts-38.png"
+    },
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "js": [ "switcher.js" ],
+      "matches": [ "http://*/*", "https://*/*", "file://*/*" ]
+    }
+  ],
+  "incognito": "spanning",
+  "permissions": [
+    "tabs",
+    "webRequest",
+    "webRequestBlocking",
+    "storage",
+    "http://*/*",
+    "https://*/*"
+  ]
+}
