@@ -15,4 +15,4 @@ mkdir ../dist/"$1"
 cp -r ../src/* ../dist/"$1"/
 cp -r ../platform/"$1"/* ../dist/"$1"/
 cd ../dist/"$1"
-zip -qr livehosts.zip *
+zip -qr livehosts-"$1".zip *
