@@ -146,14 +146,18 @@ var defaultOptions = {
     newRuleBehaviour: "all",
     incognito: "split"
 }*/
+
+var hostsKey;
+var defaultOptions;
+
 var xhr = new XMLHttpRequest();
 xhr.onreadystatechange = function() {
     if (xhr.readyState == 4 && xhr.status == 200) {
 
         var config = JSON.parse(xhr.responseText);
-        var hostsKey = config.hostsKey;
+        hostsKey = config.hostsKey;
         var optionsKey = config.optionsKey;
-        var defaultOptions = config.defaultOptions;
+        defaultOptions = config.defaultOptions;
 
         chrome.storage.sync.get([hostsKey, optionsKey], function(data) {
             
