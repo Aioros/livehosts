@@ -135,7 +135,7 @@ function resetRequestListeners() {
     chrome.webRequest.onBeforeSendHeaders.addListener(
         onBeforeSendHeadersListener,
         { urls: listenUrls }, // we listen to both hostnames and IPs in our hosts file
-        ["requestHeaders", "blocking"]
+        ["requestHeaders", "extraHeaders", "blocking"]
     );
 }
 
