@@ -1,0 +1,47 @@
+{
+  "manifest_version": 3,
+  "name": "LiveHosts",
+  "version": "2.0.0",
+  "icons": {
+    "16": "icons/livehosts-16.png",
+    "48": "icons/livehosts-48.png",
+    "128": "icons/livehosts-128.png"
+  },
+  "description": "Switch your host/IP mappings in real time without editing your hosts file",
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "options_page": "options.html",
+  "action": {
+    "default_icon": {
+      "19": "icons/livehosts-19.png",
+      "38": "icons/livehosts-38.png"
+    },
+    "default_popup": "popup.html"
+  },
+  //"content_scripts": [
+  //  {
+  //    "js": [ "switcher.js" ],
+  //    "matches": [ "*://*/*" ]
+  //  }
+  //],
+  //"web_accessible_resources": [
+  //  "config.json"
+  //],
+  "incognito": "split",
+  "permissions": [
+    //"webRequest",
+    //"webRequestBlocking",
+    "declarativeNetRequestWithHostAccess",
+    "declarativeNetRequestFeedback",
+    "storage"
+  ],
+  "host_permissions": [
+    "*://*/*"
+  ]
+}
+
+// no content script, use executescript to run the switcher stuff
+// no web_accessible_resources, import config as module
+// TODO: listeners on top-level, no global variables
