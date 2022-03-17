@@ -20,7 +20,7 @@ angular
       };
 
       self.getRules = function() {
-        storage.then(function(storage) {
+        //storage.then(function(storage) {
           storage.retrieveHosts(function(storageData) {
             $scope.$apply(function() {
               self.data = storageData;
@@ -28,11 +28,11 @@ angular
               $scope.hostForm.$setPristine();
             });
           });
-        });
+        //});
       };
 
       self.getOptions = function() {
-        storage.then(function(storage) {
+        //storage.then(function(storage) {
           storage.retrieveOptions(function(optionsData) {
             $scope.$apply(function() {
               if (optionsData)
@@ -40,7 +40,7 @@ angular
               $scope.hostForm.$setPristine();
             });
           });
-        });
+        //});
       }
 
       self.getRules();
@@ -116,7 +116,7 @@ angular
       };
 
       self.saveRules = function() {
-        storage.then(function(storage) {
+        //storage.then(function(storage) {
           storage.saveHosts(self.data.map(rule => {
             let {$$hashKey, ...cleanRule} = rule;
             cleanRule.ips = cleanRule.ips.map(ipRule => {
@@ -129,7 +129,7 @@ angular
               $scope.hostForm.$setPristine();
             });
           });
-        });
+        //});
       };
 
     }]

@@ -54,16 +54,36 @@ var optionsData = {};
 async function rebuildSessionRules(hostData, optionsData) {
     var oldRuleIds = (await chrome.declarativeNetRequest.getDynamicRules()).map(r => r.id);
 
-    //let ruleActive = hostMatch.ips.find(rule => rule.active != !!(rule.exceptions && rule.exceptions.includes(details.tabId)));
-    //check how to use tabIds and excludedTabIds in condition
-
-    var newRules = hostData
-        .filter((hostRule) => hostRule.incognito == chrome.extension.inIncognitoContext || optionsData.incognito == "share")
-        .map((hostRule) => {
-            var newRule = {};
-
-            return newRule;
-        });
+    var newRules = [];
+    var counter = 1;
+    for (hostRule of hostData) {
+        if (hostRule.incognito == chrome.extension.inIncognitoContext || optionsData.incognito == "share") {
+            for (ipRule of hostRule.ips) {
+                if (ipRule.active || ipRule.exceptions) {
+                    var newRule = {
+                        id: counter,
+                        action: {
+                            type: "redirect",
+                            redirect: {
+                                url: ipRule.ip
+                            }
+                        },
+                        condition: {
+                            urlfilter: hostRule.hostName,
+                            excludedResourceTypes: ["other"]
+                        }
+                    };
+                    if (ipRule.active && ipRule.exceptions?.length) {
+                        newRule.condition.excludedTabIds = ipRule.exceptions;
+                    } else if (!ipRule.active && ipRule.exceptions?.length) {
+                        newRule.condition.tabIds = ipRule.exceptions;
+                    }
+                    newRules.push(newRule);
+                    counter++;
+                }
+            }
+        }
+    };
 
     await chrome.declarativeNetRequest.updateSessionRules({
         removeRuleIds: oldRuleIds,
@@ -182,6 +202,7 @@ chrome.storage.sync.get([hostsKey, optionsKey], function(data) {
     //resetRequestListeners();
 
     // Recreate the dynamic rules according to our hostData
+    rebuildSessionRules(hostData, optionsData);
 
 });
 

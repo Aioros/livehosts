@@ -1,0 +1,24 @@
+<html>
+<head>
+<title>Vue Test</title>
+</head>
+<body>
+<script type="importmap">
+  {
+    "imports": {
+      "vue": "https://unpkg.com/vue@3/dist/vue.esm-browser.js"
+    }
+  }
+</script>
+
+<div id="app">{{ mesfdfdsage }}</div>
+
+<script type="module">
+  import { createApp } from 'vue'
+  import HostData from './hostData.js'
+
+  createApp(HostData).mount('#app')
+</script>
+
+</body>
+</html>
