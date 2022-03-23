@@ -38,7 +38,7 @@ async function findMappedHost(ip, tabId) {
     hostData = hostData[config.hostsKey] || [];
     var activeRule = hostData.find(
         hostRule => hostRule.ips.find(
-            ipRule => ipRule.active == !(ipRule.exceptions?.includes(tabId))
+            ipRule => ipRule.ip == ip && ipRule.active == !(ipRule.exceptions?.includes(tabId))
         )
     );
     return activeRule?.hostName;
@@ -126,7 +126,7 @@ async function onTabUpdated(tab) {
     // We use the badge text to keep track of tabs we already processed
     var badgeText = await chrome.action.getBadgeText({tabId: tab.id});
     if (badgeText != "✓") {
-        var host = await findMappedHost((new URL(tab.url)).hostName, tab.id);
+        var host = await findMappedHost((new URL(tab.url)).host, tab.id);
         // If we found an active mapping, then we can assume that this tab matched a rule
         if (host) {
             await chrome.action.setBadgeText({text:"✓", tabId: tab.id});
