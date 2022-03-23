@@ -1,7 +1,7 @@
 {
-  "manifest_version": 2,
+  "manifest_version": 3,
   "name": "LiveHosts",
-  "version": "1.1.4",
+  "version": "2.0.0",
   "icons": {
     "16": "icons/livehosts-16.png",
     "48": "icons/livehosts-48.png",
@@ -9,32 +9,30 @@
   },
   "description": "Switch your host/IP mappings in real time without editing your hosts file",
   "background": {
-    "scripts": ["background.js"]
+    "service_worker": "background.js",
+    "type": "module"
   },
   "options_page": "options.html",
-  "browser_action": {
+  "action": {
     "default_icon": {
       "19": "icons/livehosts-19.png",
       "38": "icons/livehosts-38.png"
     },
-    "default_popup": "popup.html"
+    "default_popup": "popup/popup.html"
   },
-  "content_scripts": [
-    {
-      "js": [ "switcher.js" ],
-      "matches": [ "http://*/*", "https://*/*", "file://*/*" ]
-    }
-  ],
   "web_accessible_resources": [
-    "config.json"
+    {
+      "resources": [ "/popup/*" ],
+      "matches": [ "*://*/*" ]
+    }
   ],
   "incognito": "split",
   "permissions": [
-    "tabs",
-    "webRequest",
-    "webRequestBlocking",
-    "storage",
-    "http://*/*",
-    "https://*/*"
+    "declarativeNetRequestWithHostAccess",
+    "scripting",
+    "storage"
+  ],
+  "host_permissions": [
+    "*://*/*"
   ]
 }

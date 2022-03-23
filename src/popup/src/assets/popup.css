@@ -29,7 +29,3 @@ body {
 	text-align: center;
 	margin: -10px 10px 10px;
 }
-
-form.ng-pristine .changed {
-	display: none;
-}

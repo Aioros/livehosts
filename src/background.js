@@ -1,12 +1,8 @@
-// https://gist.github.com/jlong/2428561
-function parseUrl(url) {
-    var parser = document.createElement('a');
-    parser.href = url;
-    return parser;
-}
+import { config } from "./config.js";
 
-var hostData = {};
-var optionsData = {};
+var hostsKey = config.hostsKey;
+var optionsKey = config.optionsKey;
+var defaultOptions = config.defaultOptions;
 
 /* Sample hostData structure:
 [
@@ -37,189 +33,135 @@ var optionsData = {};
 ]
 */
 
-var listenUrls = [];
-var requests = {};
-
-function setListenUrls(hostData) {
-    if (optionsData.incognito == "split")
-        hostData = hostData.filter(rule => !!rule.incognito == chrome.extension.inIncognitoContext);
-    var hostMatches = hostData.map(host => "*://" + host.hostName + "/*");
-    var ipMatches = hostData.reduce((acc, cur) => [...acc, ...cur.ips.map(el => "*://" + el.ip + "/*")], []);
-    var listenUrls = hostMatches.concat(ipMatches);
-    if (listenUrls.length == 0)
-        return ["http://www.nourlstolisten.to/"];
-    return listenUrls;
-}
-
-function activateBadge(tabId) {
-    chrome.browserAction.setBadgeBackgroundColor({color: "#ff7c00"});
-    chrome.browserAction.setBadgeText({text:"✓", tabId});
-}
-
-function deactivateBadge(tabId) {
-    chrome.browserAction.setBadgeText({text:"", tabId});
-}
-
-function onBeforeRequestListener(details) {
-    //console.log("request", details);
-    var parser = parseUrl(details.url);
-
-    let hostMatch = hostData && hostData.find(host => host.hostName === parser.hostname);
-    if (hostMatch) {    // we have a request for one of the hosts in the hosts file
-        let ruleActive = hostMatch.ips.find(rule => rule.active != !!(rule.exceptions && rule.exceptions.includes(details.tabId)));
-        // i.e. the rule is active in this tab if it's active and the tab is not an exception
-        // or if it's inactive and the tab is an exception
-        if (ruleActive) {
-            activateBadge(details.tabId);
-            // Add the host/IP/tab data to our record
-            if (details.type === "main_frame") {
-                requests[details.tabId] = {
-                    hostname: parser.hostname,
-                    ip: ruleActive.ip,
-                    tabId: details.tabId,
-                    requestId: details.requestId
-                };
-            }
-            // redirect to the IP, we will add the Host header in the onBeforeSendHeaders listener
-            return {
-                redirectUrl: parser.protocol + "//" + ruleActive.ip + (parser.port != "" ? ":" + parser.port : "") +
-                                parser.pathname + parser.search + parser.hash
-            };
-        }
-    } else {
-        // case 1: e.g. 127.0.0.1/www.example.com(/.*)?
-        // look for a matching IP/hostname pair in our hosts file
-        let host = hostData.find(host => parser.pathname.startsWith("/"+host.hostName) && host.ips.find(rule => rule.ip === parser.hostname));
-        if (host) {
-            activateBadge(details.tabId);
-            // update the record
-            requests[details.tabId] = {
-                hostname: host.hostName,
-                ip: parser.hostname,
-                tabId: details.tabId,
-                requestId: details.requestId
-            };
-            // redirect to the IP, removing the hostname from the path
-            // (we will add the Host header in the onBeforeSendHeaders listener)
-            return {
-                redirectUrl: parser.protocol + "//" + parser.hostname + (parser.port != "" ? ":" + parser.port : "") +
-                                parser.pathname.replace("/" + host.hostName, "/").replace("//", "/") + parser.search + parser.hash
-            }
-        }
-        // case 2: e.g. 127.0.0.1(/.*)?
-        // no redirect, we will manage the Host header (if needed) in the onBeforeSendHeaders listener
-        return;
-    }
-}
-
-function onBeforeSendHeadersListener(details) {
-    if (requests[details.tabId]) {  // it's one of "those" requests
-        // add the appropriate Host header
-        //console.log("adding host " + requests[details.tabId].hostname);
-        details.requestHeaders.push({
-            name: "Host",
-            value: requests[details.tabId].hostname
-        });
-        return {requestHeaders: details.requestHeaders};
-    }
-}
-
-function resetRequestListeners() {
-    chrome.webRequest.onBeforeRequest.removeListener(onBeforeRequestListener);
-    chrome.webRequest.onBeforeRequest.addListener(
-        onBeforeRequestListener,
-        { urls: listenUrls }, // we listen to both hostnames and IPs in our hosts file
-        ["blocking"]
+async function findMappedHost(ip, tabId) {
+    var hostData = await chrome.storage.sync.get(config.hostsKey);
+    hostData = hostData[config.hostsKey] || [];
+    var activeRule = hostData.find(
+        hostRule => hostRule.ips.find(
+            ipRule => ipRule.active == !(ipRule.exceptions?.includes(tabId))
+        )
     );
-    chrome.webRequest.onBeforeSendHeaders.removeListener(onBeforeSendHeadersListener);
-    chrome.webRequest.onBeforeSendHeaders.addListener(
-        onBeforeSendHeadersListener,
-        { urls: listenUrls }, // we listen to both hostnames and IPs in our hosts file
-        ["requestHeaders", "extraHeaders", "blocking"]
-    );
+    return activeRule?.hostName;
 }
 
-/*var hostsKey = "livehosts";
-var optionsKey = "livehostsOptions";
+async function rebuildSessionRules(hostData, optionsData) {
+    var oldRuleIds = (await chrome.declarativeNetRequest.getSessionRules()).map(r => r.id);
 
-var defaultOptions = {
-    newRuleBehaviour: "all",
-    incognito: "split"
-}*/
-
-var hostsKey;
-var defaultOptions;
-
-var xhr = new XMLHttpRequest();
-xhr.onreadystatechange = function() {
-    if (xhr.readyState == 4 && xhr.status == 200) {
-
-        var config = JSON.parse(xhr.responseText);
-        hostsKey = config.hostsKey;
-        var optionsKey = config.optionsKey;
-        defaultOptions = config.defaultOptions;
-
-        chrome.storage.sync.get([hostsKey, optionsKey], function(data) {
-            
-            if (!data[hostsKey])
-                data[hostsKey] = [];
-            if (!data[optionsKey])
-                data[optionsKey] = defaultOptions;
-
-            hostData = data[hostsKey];
-            optionsData = data[optionsKey];
-
-            listenUrls = setListenUrls(hostData);
-
-            resetRequestListeners();
-
-            // This is the ugly trick. We can't actually replace the URL in the address bar completely without
-            // a redirect, so we settle for a not-so-subtle fallback: we add the hostname right after the IP.
-            // We send the hostname as a message to the tab, and use the History API in its content script.
-            chrome.tabs.onUpdated.addListener(function(tabId, info, tab) {
-                if (info.status === "complete") {
-                    if (requests[tabId]) {
-                        activateBadge(tabId);
-                        var host = requests[tabId].hostname;
-                        chrome.tabs.sendMessage(tabId, {host: host}, function (response) {
-                            if (chrome.runtime.lastError)
-                                console.log(chrome.runtime.lastError);
-                        });
-                        // delete the completed request from our record
-                        delete requests[tabId];
+    var newRules = [];
+    var counter = 1;
+    for (let hostRule of hostData) {
+        if (hostRule.incognito == chrome.extension.inIncognitoContext || optionsData.incognito == "share") {
+            for (let ipRule of hostRule.ips) {
+                if (ipRule.active || ipRule.exceptions) {
+                    var newRedirectRule = {
+                        id: counter++,
+                        action: {
+                            type: "redirect",
+                            redirect: {
+                                regexSubstitution: `\\1://${ipRule.ip}/\\4`
+                            }
+                        },
+                        condition: {
+                            regexFilter: `(.*)://(${ipRule.ip}/)?(${hostRule.hostName})/(.*)`,
+                            resourceTypes: [
+                                "main_frame","sub_frame","stylesheet","script","image","font","object",
+                                "xmlhttprequest","ping","csp_report","media","websocket","webtransport",
+                                "webbundle","other"
+                            ]
+                        }
+                    };
+                    var newModifyHeadersRule = {
+                        id: counter++,
+                        action: {
+                            type: "modifyHeaders",
+                            requestHeaders: [{
+                                header: "Host",
+                                operation: "set",
+                                value: hostRule.hostName
+                            }]
+                        },
+                        condition: {
+                            urlFilter: "||" + ipRule.ip,
+                            resourceTypes: [
+                                "main_frame","sub_frame","stylesheet","script","image","font","object",
+                                "xmlhttprequest","ping","csp_report","media","websocket","webtransport",
+                                "webbundle","other"
+                            ]
+                        }
+                    };
+                    if (ipRule.active && ipRule.exceptions?.length) {
+                        newRedirectRule.condition.excludedTabIds = ipRule.exceptions;
+                        newModifyHeadersRule.condition.excludedTabIds = ipRule.exceptions;
+                    } else if (!ipRule.active && ipRule.exceptions?.length) {
+                        newRedirectRule.condition.tabIds = ipRule.exceptions;
+                        newModifyHeadersRule.condition.tabIds = ipRule.exceptions;
                     }
+                    newRules.push(newRedirectRule);
+                    newRules.push(newModifyHeadersRule);
                 }
-            });
-
-            chrome.tabs.onRemoved.addListener(function(tabId, info) {
-                delete requests[tabId];
-            });
-
-        });
-
-        chrome.storage.onChanged.addListener(function(changes, namespace) {
-            if (changes[hostsKey]) {
-                hostData = changes[hostsKey].newValue;
             }
-            if (changes[optionsKey]) {
-                optionsData = changes[optionsKey].newValue;
-            }
-            if (changes[hostsKey] || changes[optionsKey]) {
-                listenUrls = setListenUrls(hostData);
-                resetRequestListeners();
-            }
-        });
-    }
+        }
+    };
 
-};
-
-xhr.open("GET", chrome.runtime.getURL('config.json'), true);
-xhr.send();
-
-function deleteRules(filter = (r => true)) {
-    hostData = hostData.filter(r => !filter(r));
-    chrome.storage.sync.set({[hostsKey]: hostData});
+    await chrome.declarativeNetRequest.updateSessionRules({
+        removeRuleIds: oldRuleIds,
+        addRules: newRules
+    });
 }
+
+chrome.storage.sync.get([hostsKey, optionsKey], function(data) {
+    
+    var hostData = data[hostsKey] || [];
+    var optionsData = data[optionsKey] || defaultOptions;
+
+    // Recreate the dynamic rules according to our hostData
+    rebuildSessionRules(hostData, optionsData);
+
+});
+
+// This is the ugly trick. We can't actually replace the URL in the address bar completely without
+// a redirect, so we settle for a not-so-subtle fallback: we add the hostname right after the IP.
+// We send the hostname to the tab, and use the History API in its injected script.
+async function onTabUpdated(tab) {
+    // We use the badge text to keep track of tabs we already processed
+    var badgeText = await chrome.action.getBadgeText({tabId: tab.id});
+    if (badgeText != "✓") {
+        var host = await findMappedHost((new URL(tab.url)).hostName, tab.id);
+        // If we found an active mapping, then we can assume that this tab matched a rule
+        if (host) {
+            await chrome.action.setBadgeText({text:"✓", tabId: tab.id});
+            chrome.scripting.executeScript({
+                target: { tabId: tab.id },
+                function: (host) => {
+                    window.history.replaceState({}, "", "/" + host + location.pathname + location.search + location.hash);
+                },
+                args: [host]
+            });
+        }
+    }
+}
+
+chrome.tabs.onUpdated.addListener(function(tabId, info, tab) {
+    if (info.status === "complete") {
+        onTabUpdated(tab);
+    }
+});
+
+chrome.storage.onChanged.addListener(function(changes, namespace) {
+    if (changes[hostsKey]) {
+        var hostData = changes[hostsKey].newValue;
+    }
+    if (changes[optionsKey]) {
+        var optionsData = changes[optionsKey].newValue;
+    }
+    if (changes[hostsKey] || changes[optionsKey]) {
+        rebuildSessionRules(hostData, optionsData);
+    }
+});
+
+chrome.declarativeNetRequest.setExtensionActionOptions({
+    displayActionCountAsBadgeText: true
+});
 
 // This part here is something that could work in the future (intercepting the request through the DevTools protocol)
 // https://stackoverflow.com/a/45220932/1882497

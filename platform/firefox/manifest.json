@@ -1,13 +1,7 @@
 {
-  "manifest_version": 2,
+  "manifest_version": 3,
   "name": "LiveHosts",
-  "version": "1.1.4",
-  "browser_specific_settings": {
-    "gecko": {
-      "id": "livehosts@aioros.net",
-      "strict_min_version": "57.0"
-    }
-  },
+  "version": "2.0.0",
   "icons": {
     "16": "icons/livehosts-16.png",
     "48": "icons/livehosts-48.png",
@@ -15,32 +9,30 @@
   },
   "description": "Switch your host/IP mappings in real time without editing your hosts file",
   "background": {
-    "scripts": ["background.js"]
+    "service_worker": "background.js",
+    "type": "module"
   },
-  "options_ui": { "page": "options.html"},
-  "browser_action": {
+  "options_page": "options.html",
+  "action": {
     "default_icon": {
       "19": "icons/livehosts-19.png",
       "38": "icons/livehosts-38.png"
     },
-    "default_popup": "popup.html"
+    "default_popup": "popup/popup.html"
   },
-  "content_scripts": [
+  "web_accessible_resources": [
     {
-      "js": [ "switcher.js" ],
-      "matches": [ "http://*/*", "https://*/*", "file://*/*" ]
+      "resources": [ "/popup/*" ],
+      "matches": [ "*://*/*" ]
     }
   ],
-  "web_accessible_resources": [
-    "config.json"
-  ],
-  "incognito": "spanning",
+  "incognito": "split",
   "permissions": [
-    "tabs",
-    "webRequest",
-    "webRequestBlocking",
-    "storage",
-    "http://*/*",
-    "https://*/*"
+    "declarativeNetRequestWithHostAccess",
+    "scripting",
+    "storage"
+  ],
+  "host_permissions": [
+    "*://*/*"
   ]
 }

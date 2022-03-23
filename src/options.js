@@ -1,4 +1,6 @@
-var optionsKey = "livehostsOptions";
+import { config } from "./config.js"
+
+var optionsKey = config.optionsKey;
 var previousIncognito = null;
 
 function showStatus(statusMessage) {
@@ -37,7 +39,7 @@ function restoreOptions() {
   chrome.storage.sync.get(optionsKey, function(items) {
     var items = Object.assign(
       {},
-      chrome.extension.getBackgroundPage().defaultOptions,
+      config.defaultOptions,
       items[optionsKey]
     );
     document.querySelector('input[name="new_rule_behaviour"][value="'+items.newRuleBehaviour+'"]').checked = true;
